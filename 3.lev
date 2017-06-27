@@ -1,0 +1,21 @@
+# Copyright (C) 2017 Asher Blum
+$floorColor 0xff00ff
+$wallColor 0x330033
+$baseMonsterSpeed 0.006
+xxxxxxxxxxxxxxxxx
+x*            P x
+x xxxxx x xxxxx x
+x x    *x*    x x
+x x x xxxxx x x x
+x x x       x x x
+x x x x x x x x x
+x*x*x  *x*  x*x*x
+x x x xxxxx x x x
+x x x * x * x x x
+x x x x x x x x x
+x x x  *M*  x x x
+x x x xxxxx x x x
+x x*         *x x
+x*xxxxx x xxxxx x
+x**    *x*     *x
+xxxxxxxxxxxxxxxxx

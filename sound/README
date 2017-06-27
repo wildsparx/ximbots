@@ -1,0 +1,6 @@
+To build the sounds you need:
+  * synthem80
+  * edit mksw.pl to point to synthem80
+  * sox (to convert .sw to .wav)
+
+The Makefile will build the sounds needed by the app.

@@ -1,0 +1,283 @@
+<html>
+<head>
+<script type="text/javascript">
+
+M = {
+  full_screen: 1,
+  record_commands: 0, /* record for demo? */
+  time_sf: 1,
+  H: 17, /* screen size in tiles */
+  W: 17,
+  zx: 0,
+  running: 1,
+  now: 0,
+  lev_no: 0,
+  wrap_count: 0 /* how many times we've finished all levels */
+};
+
+@include(levels.auto)
+@include(sound/sounds.auto)
+@include(demos.auto)
+
+window.requestAnimFrame = (function(callback) {
+    return window.requestAnimationFrame ||
+           window.webkitRequestAnimationFrame ||
+           window.mozRequestAnimationFrame ||
+           window.oRequestAnimationFrame ||
+           window.msRequestAnimationFrame ||
+           function(callback) {
+             window.setTimeout(callback, 1000 / 60);
+           };
+})();
+
+
+function wdebug(s) {
+  document.getElementById("debug").innerHTML = s;
+}
+
+function draw_bg(context) {
+  context.fillStyle = '#000';
+  context.fillRect(0, 0, M.cnv.width, M.cnv.height);
+}
+
+@include(timed_moder.inc)
+@include(flasher.inc)
+@include(twinkle_scanner.inc)
+@include(press_any_key.inc)
+@include(curtain.inc)
+@include(dbox.inc)
+@include(instructions.inc)
+@include(splash_screen.inc)
+@include(carriage.inc)
+@include(ball.inc)
+@include(gem.inc)
+@include(monster.inc)
+@include(monster_generator.inc)
+@include(player.inc)
+@include(level.inc)
+@include(score.inc)
+@include(sound_bank.inc)
+@include(command_recorder.inc)
+@include(command_player.inc)
+
+M.on_mode_timeout = function(mode) {
+  switch(mode) {
+    case M.moder.modes.INSTRUCTIONS:
+      M.moder.set(M.moder.modes.SPLASH);
+      M.splash = new SplashScreen();
+      M.instructions = null;
+      break;
+    case M.moder.modes.DEMO:
+      M.moder.set(M.moder.modes.SPLASH);
+      M.splash = new SplashScreen();
+      M.instructions = null;
+      break;
+    case M.moder.modes.SPLASH:
+      M.moder.set(M.moder.modes.DEMO);
+      M.splash = null;
+      M.level = new Level(0);
+      M.level.load();
+      M.level.moder.set(M.level.moder.modes.PLAY); // skip GET READY
+      M.press_any = new PressAny(15.5, M.levels[0].floorColor);
+      M.command_player = new CommandPlayer(M.demos.a, M.level.player);
+      console.log("started demo");
+      break;
+  }
+}
+
+function draw_frame() {
+  var now = window.performance.now();
+  var dt = now - M.now;
+  M.now = now;
+  dt *= M.time_sf;
+  if(dt > 100) { /* prevent crazy behavior ... */
+    dt = 25;
+  }
+  //var cnv = document.getElementById('cnv');
+  //var ctx = cnv.getContext('2d');
+  draw_bg(M.ctx);
+
+  var xsf = M.cnv.width / M.W;
+  var ysf = M.cnv.height / (1+M.H);
+  var sf = (xsf < ysf) ? xsf : ysf;
+  var xslack = M.cnv.width - sf * M.W;
+
+  M.moder.tic(dt);
+  M.twinkle_scanner.tic(dt);
+  M.ctx.save();
+  if(xslack > 0) {
+    M.ctx.translate(xslack/2, 0);
+  }
+  M.ctx.scale(sf, sf);
+  M.ctx.translate(0, 1);
+  switch(M.moder.mode) {
+    case M.moder.modes.SPLASH:
+      M.splash.tic(dt);
+      M.splash.draw();
+      break;
+    case M.moder.modes.INSTRUCTIONS:
+      M.instructions.tic(dt);
+      M.instructions.draw();
+      break;
+    case M.moder.modes.PLAY:
+      M.level.draw();
+      M.level.tic(dt);
+      //draw_score();
+      M.score.draw();
+      break;
+    case M.moder.modes.DEMO:
+      M.level.draw();
+      M.press_any.draw();
+      M.level.tic(dt);
+      M.press_any.tic(dt);
+      break;
+  }
+  M.ctx.restore();
+
+  requestAnimFrame(function() {
+    draw_frame();
+  });
+}
+
+function on_key_down(e) {
+  //console.log("key: " + e.keyCode);
+  switch(M.moder.mode) {
+    case M.moder.modes.SPLASH:
+      M.splash = null;
+      M.instructions = new InstructionsScreen();
+      M.moder.set(M.moder.modes.INSTRUCTIONS);
+      return;
+    case M.moder.modes.INSTRUCTIONS:
+      M.instructions = null;
+      M.level = new Level(0);
+      M.level.load();
+      M.sounds.rdy.play();
+      M.moder.set(M.moder.modes.PLAY);
+      if(M.record_commands) {
+        M.command_recorder = new CommandRecorder(window.performance.now());
+      }
+      return;
+    case M.moder.modes.DEMO:
+      //M.splash = null;
+      M.instructions = new InstructionsScreen();
+      M.moder.set(M.moder.modes.INSTRUCTIONS);
+      return;
+  }
+  if(M.command_recorder) {
+    var t = M.level.player.c._t;
+    M.command_recorder.on_key(t[0], t[1], e.keyCode);
+  }
+  switch(e.keyCode) {
+    case 55: // 7 - force celebrate
+      //M.level.start_celebrate();
+      on_level_done();
+      break;
+    case 27: // escape
+      M.sounds.stop_all();
+      M.level = null;
+      M.splash = new SplashScreen();
+      M.moder.set(M.moder.modes.SPLASH);
+      if(M.command_recorder) {
+        M.command_recorder.wlog();
+      }
+      break;
+    default:
+      M.level.player.on_key_down(e);
+  }
+}
+
+M.on_level_done = function() {
+  M.lev_no ++;
+
+  if(M.lev_no >= M.levels.length) {
+    M.lev_no = 0;
+    M.wrap_count ++;
+  }
+  if(M.command_recorder) {
+    M.command_recorder.wlog();
+  }
+
+  M.level = new Level(M.lev_no);
+  M.level.load();
+  M.sounds.rdy.play();
+}
+
+M.on_player_death = function() {
+  if(M.command_recorder) {
+    M.command_recorder.wlog();
+  }
+  switch(M.moder.mode) {
+    case M.moder.modes.DEMO:
+      M.on_mode_timeout(M.moder.mode);
+      break;
+    case M.moder.modes.PLAY:
+      M.level = new Level(M.lev_no);
+      M.level.load();
+      M.sounds.rdy.play();
+      break;
+  }
+}
+
+M.on_player_midsquare = function(x, y) {
+  if(M.command_player) {
+    M.command_player.on_player_midsquare(x, y);
+  }
+}
+
+function resize_canvas_to_window() {
+  M.cnv.width = 0.9 * window.innerWidth;
+  M.cnv.height = 0.9 * window.innerHeight;
+}
+
+M.on_level_finish_ready = function() {
+  if(M.record_commands) {
+    M.command_recorder = new CommandRecorder(window.performance.now());
+  }
+}
+
+function init() {
+  M.moder = new TimedModer(M, [
+    ['SPLASH', 4000],
+    ['DEMO', 0],
+    ['INSTRUCTIONS', 6000],
+    ['PLAY', 0],
+  ]);
+  
+  M.cnv = document.getElementById('cnv');
+  M.ctx = M.cnv.getContext('2d');
+  M.sounds = new SoundBank();
+  M.splash = new SplashScreen();
+  M.twinkle_scanner = new TwinkleScanner();
+  M.score = new Score();
+
+  if(M.record_commands) {
+    M.command_recorder = new CommandRecorder(window.performance.now());
+  }
+
+  if(M.full_screen) {
+    resize_canvas_to_window();
+  }
+
+  window.addEventListener('resize', resize_canvas_to_window, false);
+  document.addEventListener("keydown", on_key_down, false);
+}
+
+</script>
+<style>
+</style>
+</head>
+<body bgcolor="#000">
+
+<canvas id="cnv" width="400" height="400" style="padding:0;margin:auto;display:block">
+This text is displayed if your browser does not support HTML5 Canvas.
+</canvas>
+<div id="debug" style="font:#fff"></div>
+
+<script type="text/javascript">
+// call after canvas is set up
+init();
+draw_frame(); /* just once - it will self-hook */
+</script>
+
+</body>
+</html>

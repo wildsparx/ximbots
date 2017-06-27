@@ -1,0 +1,23 @@
+# Copyright (C) 2017 Asher Blum
+$wallStyle 0
+$floorStyle 1
+$auxColor 0x303000
+$floorColor 0x301000
+$wallColor 0x705000
+xxxxxxxxxxxxxxxxx
+x*     P       *x
+xxx xxx xxx xxx x
+x  *   *   *   *x
+x xxx xxx xxx xxx
+x*   *   *   *  x
+xxx xxx xxx xxx x
+x  *   *   *   *x
+x xxx xxx xxx xxx
+x    *   *   *  x
+xxx xxx xxx xxx x
+x  *   *   *   *x
+x xxx xxx xxx xxx
+x*   * *     *  x
+xxx xxx xxx xxx x
+xM*     *      *x
+xxxxxxxxxxxxxxxxx

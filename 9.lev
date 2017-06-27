@@ -1,0 +1,21 @@
+# Copyright (C) 2017 Asher Blum
+$baseMonsterSpeed 0.010
+$monsterSpeedInc  0.0019
+$nMonsters 3
+*.......P.......*
+.x.x.xxxxxxx.x.x.
+..*x.xxxxxxx.x*..
+.xxx.xxxxxxx.xxx.
+.....xxxxxxx.....
+.xxxxxxxxxxxxxxx.
+.xxxxxxxxxxxxxxx.
+.xx*.........*xx.
+.xx.xxxx.xxxx.xx.
+.xx.x...M...x.xx.
+.xx.x.xxxxx.x.xx.
+.xx.x.xxxxx.x.xx.
+.xx.x...*...x.xx.
+.xx.xxxxxxxxx.xx.
+.xx*.........*xx.
+.xxxxxxx.xxxxxxx.
+*...............*

@@ -1,0 +1,20 @@
+# Copyright (C) 2017 Asher Blum
+
+## Specs for all sounds in game in synthem80 format
+## Each line: name, millis, sound spec
+
+## shot, gem, celebr, death
+
+sht 300 pink(amp=0.5) adsr(in=< at=0.01 dt=0.03 st=.1 sv=0.1 rt=.02)
+gem 300 timer(t=0.12) wav(f=7 wf=1 amp=550) quant(in=< range=550 steps=7) add(a=< b=600) nmc(f=< wf=3)
+cel 880 wav(f=1.1 wf=1 amp=550) quant(in=< range=550 steps=7) add(a=< b=600) nmc(f=< wf=3)
+die 900 wav(f=0.8 wf=2 amp=300) add(a=< b=300) wav(wf=0 f=< a=0.5) add(a=42 b=$1) wav(wf=0 f=< a=0.5) add(a=$2 b=$4)
+
+## hit monster, ball bounce, get-ready:
+
+mon 700 timer(t=0.5) wav(wf=1 f=1.4 amp=550) add(a=< b=550) wav(wf=0 f=<)
+bnc 250 wav(wf=0 amp=1 f=1000) adsr(in=< at=0.01 dt=0.05 st=.1 sv=0.1 rt=.02)
+rdy 3000 wav(wf=1 f=0.33 a=10) add(a=< b=90) pulse(dc=0.1 f=< a=0.5) pulse(dc=0.25 f=45 a=0.5) add(a=< b=$2)
+
+## junk
+jnk 500 wav(f=50 wf=1 amp=1)

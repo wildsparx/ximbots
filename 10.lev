@@ -1,0 +1,26 @@
+# Copyright (C) 2017 Asher Blum
+# 1.lev + more monsters, moderate speed
+$floorColor 0x111111
+$wallColor 0x777777
+$auxColor 0x222222
+$wallStyle 1
+$nMonsters 10
+$baseMonsterSpeed 0.004
+$monsterSpeedInc 0.00005
+xxxxxxxxxxxxxxxxx
+x     P         x
+x x x x x x x x x
+x   *   *   *   x
+x x x x*x*x x x x
+x       *       x
+x x x x x x x x x
+x       *       x
+x x x*x*x*x*x x x
+x   *  *M*  *   x
+x x x x*x*x x x x
+x       *       x
+x x x x x x x x x
+x       *       x
+x x x x x x x x x
+x               x
+xxxxxxxxxxxxxxxxx
